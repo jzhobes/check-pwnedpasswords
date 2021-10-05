@@ -1,0 +1,36 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+#    - name: Cache node modules
+#      uses: actions/cache@v2
+#      with:
+#        path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+#        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+#        restore-keys: |
+#          ${{ runner.os }}-build-${{ env.cache-name }}-
+#          ${{ runner.os }}-build-
+#          ${{ runner.os }}-
+    - name: yarn, lint, and test
+      run: |
+        yarn
+        yarn lint
+        yarn test
+      env:
+        CI: true
