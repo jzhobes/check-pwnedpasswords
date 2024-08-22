@@ -17,8 +17,8 @@ module.exports = (password, timeout = 5000) => {
 
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
-    const range = hash.substr(0, 5);
-    const remainder = hash.substr(5);
+    const range = hash.slice(0, 5);
+    const remainder = hash.slice(5);
     let result = '';
     https.get(`https://api.pwnedpasswords.com/range/${range}`, {timeout}, (res) => {
       res.on('data', (data) => {
