@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const https = require('https');
 
 /**
  * Invokes the Have I Been Pwned API v2 endpoint and returns the results.
@@ -8,39 +7,51 @@ const https = require('https');
  * @param {number} timeout
  * @return {Promise}
  */
-module.exports = (password, timeout = 5000) => {
+module.exports = async (password, timeout = 5000) => {
   const isInvalidPasswordInput = !password || typeof password !== 'string';
   const isInvalidTimeoutInput = !timeout || typeof timeout !== 'number' || timeout <= 0 || timeout > Number.MAX_SAFE_INTEGER;
   if (isInvalidPasswordInput || isInvalidTimeoutInput) {
-    return Promise.reject(new Error('Invalid input.'));
+    throw new Error('Invalid input.');
   }
 
-  return new Promise((resolve, reject) => {
-    const hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
-    const range = hash.slice(0, 5);
-    const remainder = hash.slice(5);
-    let result = '';
-    https.get(`https://api.pwnedpasswords.com/range/${range}`, {timeout}, (res) => {
-      res.on('data', (data) => {
-        result += data;
-      }).on('end', () => {
-        const match = result.split('\r\n').find((hashRemainder) => hashRemainder.startsWith(remainder));
-        let pwned = false;
-        let occurrences = 0;
-        if (match) {
-          pwned = true;
-          occurrences = parseInt(match.split(':')[1], 10);
-        }
-        resolve({
-          pwned,
-          occurrences,
-        });
-      });
+  const hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
+  const range = hash.slice(0, 5);
+  const remainder = hash.slice(5);
+  const apiUrl = `https://api.pwnedpasswords.com/range/${range}`;
+  let fetchTimeout;
+  try {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    fetchTimeout = setTimeout(() => {
+      controller.abort();
+    }, timeout);
 
-    }).on('timeout', () => {
-      reject(new Error(`Timed out after ${timeout}ms.`));
-    }).on('error', (e) => {
-      reject(e);
-    });
-  });
+    const res = await fetch(apiUrl, {signal});
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const resultText = await res.text();
+    const match = resultText.split('\r\n').find((hashRemainder) => hashRemainder.startsWith(remainder));
+    let pwned = false;
+    let occurrences = 0;
+    if (match) {
+      pwned = true;
+      occurrences = parseInt(match.split(':')[1], 10);
+    }
+
+    return {
+      pwned,
+      occurrences,
+    };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Timed out after ${timeout}ms.`);
+    } else {
+      throw error;
+    }
+  } finally {
+    clearTimeout(fetchTimeout);
+  }
 };

@@ -38,4 +38,11 @@ describe('check-pwnedpasswords', () => {
       .replyWithError(new Error('Mocked error scenario.'));
     await expect(checkPwnedPasswords('foobar')).rejects.toThrow(expect.anything());
   });
+
+  it('throws error message if pwnedpasswords.com returns a non-ok status code', async () => {
+    nock('https://api.pwnedpasswords.com')
+      .get(/\/range.+/)
+      .reply(404, 'Not Found');
+    await expect(checkPwnedPasswords('foobar')).rejects.toThrow('HTTP error! status: 404');
+  });
 });
