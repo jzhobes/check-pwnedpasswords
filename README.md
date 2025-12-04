@@ -1,6 +1,12 @@
 # check-pwnedpasswords
 
+![Build Status](https://github.com/jzhobes/check-pwnedpasswords/actions/workflows/nodejs.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![NPM Version](https://img.shields.io/npm/v/check-pwnedpasswords.svg)
+
 A simple, secure Node.js module that checks passwords against the [Have I Been Pwned](https://haveibeenpwned.com) database using their k-Anonymity API.
+
+### [🚀 Live Demo](https://jzhobes.github.io/check-pwnedpasswords/)
 
 ## Installation
 
