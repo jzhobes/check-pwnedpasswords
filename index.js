@@ -9,7 +9,7 @@ const crypto = require('crypto');
  */
 module.exports = async (password, timeout = 5000) => {
   const isInvalidPasswordInput = !password || typeof password !== 'string';
-  const isInvalidTimeoutInput = !timeout || typeof timeout !== 'number' || timeout <= 0 || timeout > Number.MAX_SAFE_INTEGER;
+  const isInvalidTimeoutInput = !timeout || typeof timeout !== 'number' || timeout <= 0 || timeout > 2147483647;
   if (isInvalidPasswordInput || isInvalidTimeoutInput) {
     throw new Error('Invalid input.');
   }
@@ -33,7 +33,7 @@ module.exports = async (password, timeout = 5000) => {
     }
 
     const resultText = await res.text();
-    const match = resultText.split('\r\n').find((hashRemainder) => hashRemainder.startsWith(remainder));
+    const match = resultText.split(/\r?\n/).find((hashRemainder) => hashRemainder.startsWith(remainder));
     let pwned = false;
     let occurrences = 0;
     if (match) {

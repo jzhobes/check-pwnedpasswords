@@ -14,13 +14,16 @@
     "pwned",
     "security"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "eslint": "^9.21.0",
-    "eslint-plugin-jest": "^28.11.0",
-    "globals": "^16.0.0",
-    "jest": "^29.7.0",
-    "nock": "^14.0.1"
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jest": "29.2.1",
+    "globals": "16.5.0",
+    "jest": "^30.2.0",
+    "nock": "^14.0.10"
   },
   "scripts": {
     "lint": "eslint *.js --format stylish",
